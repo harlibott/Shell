@@ -2,7 +2,8 @@
 
 void prompt();
 void exec();
-void pretendMain(std::string);
-int error(int);
-void io();
+void pretendMain(std:: string);
+void breakDown();
+void error(int);
+bool io();
 void in();
