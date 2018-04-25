@@ -3,6 +3,6 @@
 void prompt();
 void exec();
 void pretendMain(std::string);
-void error(int);
+int error(int);
 void io();
 void in();
