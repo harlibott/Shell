@@ -25,32 +25,39 @@ int main(){
     int i = 0;
     token = strtok(str, " ");
 
-    if(!strcmp(token, "exit") || !strcmp(token, "quit")){
-      return EXIT_SUCCESS;
-    }
+    if(strcmp(token, "exit") == 0 || strcmp(token, "quit") == 0){
+	return EXIT_SUCCESS;
+      }
+      if(strcmp(token, "<") == 0 || strcmp(token, ">") == 0 || strcmp(token, ">>") == 0){
+	io(token);
+      }
 
-    if(!strcmp(token, "<") || (!strcmp(token, ">")) || (!strcmp(token,">>"))){
-      io(token);
-    }
-    
-    while(token != NULL){
-
-      tokes[i] = token;
-      token = strtok(NULL, " ");
-      i++;
-    }
-
-    int pid = fork();
-    if(pid == 0){
-    execvp(tokes[0], tokes);
-    }else{
-      wait(nullptr);
-    }    
+      while(token != NULL){
+	tokes[i] = token;
+	token = strtok(NULL, " ");
+	i++;
+	
+	int pid = fork();
+	if(pid == 0){
+	  if(execvp(tokes[0], tokes) < 0){
+	    continue;
+	  }
+	}else{
+	  wait(nullptr);
+	}
+      }// while   
   }// shell while loop
 }// main
 
 void io(char * token){
+
+  if(!strcmp(token, "<")){
  
+  }else if(!strcmp(token, ">")){
+ 
+  }else if(!strcmp(token, ">>")){
+
+  }  
 }// io redirection method
 
 void prompt(){
