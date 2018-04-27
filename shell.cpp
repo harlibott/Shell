@@ -35,7 +35,6 @@ int main(){
       if(word.compare("exit") == 0 || word.compare("quit") == 0){
 	return EXIT_SUCCESS;
       }
-
       pretendMain(word); // calls the shell main to put every word into a vector
       i++; // incraments each args
     }// while
@@ -46,7 +45,6 @@ int main(){
     }else{
       exec();
     }
-
     if(done){ // handles removing vector to start over a new command string
       breakDown();
     }// breakdown
@@ -58,9 +56,9 @@ bool io(){
 
   if(args.at(1).compare("<") == 0){
     cout << "<" << endl;
-   }else if(args.at(1).compare(">") == 0){
+  }else if(args.at(1).compare(">") == 0){
     cout << ">" << endl;
-   }else if(args.at(1).compare(">>") == 0){
+  }else if(args.at(1).compare(">>") == 0){
     cout << ">>" << endl;
   }else{
     returnVal = false;
@@ -74,33 +72,28 @@ void exec(){
     return;
   }// if there is nothing in trhe vector, run loop again
  
- for(uint i = 0; i < args.size(); i++){
+  for(uint i = 0; i < args.size(); i++){
     if(args.at(i).empty()){
       error(2); // handles if it is trying to access a null element
     }     
   }// for
   
- // TODO : exec stuff
-  bool finished = false;
+  // TODO : exec stuff
   string arg1 = "/bin/";
   arg1 += args.at(0);
 
   const char * temp = arg1.c_str();
-  const char * flags = args.at(1).c_str();
- 
+  const char * flags = args.at(1).c_str(); 
+
   // forks 
   int pid = fork();
-  
   if(pid == 0){
     // child
-    cout << "in child" << endl;
     execl(temp, temp, flags, (char*)0); // handles exec   
+    done = true;  
   }else{
     // parent
     wait(nullptr);
-    finished = true;
-  }
-  if(finished){ // if  command is finished, run a new iteration
     done = true;
   }
 }// exec
