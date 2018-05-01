@@ -14,12 +14,13 @@ using namespace std;
 
 int main(){
 
+
   while(true){ // program loop
     prompt(); // prompts the user 
   
     char str[1042];
     cin.getline(str, 1042);
-
+    int fileIn, fileOut;
     char * tokes [1042];
     char * token;
     int i = 0;
@@ -31,6 +32,7 @@ int main(){
       if(strcmp(token, "<") == 0 || strcmp(token, ">") == 0 || strcmp(token, ">>") == 0){
 	io(token);
       }
+      //potential strcmp or !strcmp mistake above
 
       while(token != NULL){
 	tokes[i] = token;
@@ -52,13 +54,47 @@ int main(){
 void io(char * token){
 
   if(!strcmp(token, "<")){
+
+    fileIn = open(token+1, O_RDONLY);
+    dup2(fileIn, 0);
+    close(fileIn);
+    //break;
  
   }else if(!strcmp(token, ">")){
- 
+
+    fileOut = open(token+1, O_WRONLY);
+    dup2(fileOut, 1);
+    close(fileOut);
+    //break;
+
   }else if(!strcmp(token, ">>")){
 
   }  
 }// io redirection method
+
+/*
+  int f = open(argv[1], O_RDONLY);
+  int copy = dup(0);
+
+  if (f<0){
+  cout << "\nError opening file\n" << endl;
+  return 1;
+  }
+  //check for proper usage, expecting one argument -- file to read from
+ 
+  read();
+  // redirect standard input from file
+ 
+  dup2(f,0);
+  read();
+  close(f);
+  // revert back from actual standard input
+
+  dup2(copy,0);
+  read();
+}
+ */
+
 
 void prompt(){
   // gets the cwd and prints it out as a prompt to the screen
