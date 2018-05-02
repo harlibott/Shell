@@ -78,7 +78,7 @@ void io(char * token){
     }else{
       wait(nullptr);
     }
-    fileOut = open(token+1, O_WRONLY);
+    fileOut = open(token+1, O_WRONLY | O_TRUNC);
     dup2(fileOut, 1);
     close(fileOut);
     //break;
@@ -92,6 +92,10 @@ void io(char * token){
     }else{
       wait(nullptr);
     }
+    fileOut = open(token+1, O_WRONLY | O_APPEND);
+    dup2(fileOut, 1);
+    close(fileOut);
+    //break;
   }  
 }// io redirection method
 
