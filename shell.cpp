@@ -29,25 +29,25 @@ int main(){
     if(strcmp(token, "exit") == 0 || strcmp(token, "quit") == 0){
 	return EXIT_SUCCESS;
       }
-      if(strcmp(token, "<") == 0 || strcmp(token, ">") == 0 || strcmp(token, ">>") == 0){
+    if(strcmp(token, "<") == 0 || strcmp(token, ">") == 0 || strcmp(token, ">>") == 0){
 	io(token);
-      }
-      //potential strcmp or !strcmp mistake above
+    }
+    //potential strcmp or !strcmp mistake above
 
-      while(token != NULL){
-	tokes[i] = token;
-	token = strtok(NULL, " ");
-	i++;
-	
-	int pid = fork();
-	if(pid == 0){
-	  if(execvp(tokes[0], tokes) < 0){
-	    continue;
-	  }
-	}else{
-	  wait(nullptr);
+    while(token != NULL){
+      tokes[i] = token;
+      token = strtok(NULL, " ");
+      i++;
+      
+      int pid = fork();
+      if(pid == 0){
+	if(execvp(tokes[0], tokes) < 0){
+	  continue;
 	}
-      }// while   
+      }else{
+	wait(nullptr);
+      }
+    }// while   
   }// shell while loop
 }// main
 
@@ -55,6 +55,14 @@ void io(char * token){
 
   if(!strcmp(token, "<")){
 
+    int pid1 = fork();
+    if(pid1 == 0){
+      if(execvp(tokes[0], tokes) < 0){
+	continue;
+      }
+    }else{
+      wait(nullptr);
+    }
     fileIn = open(token+1, O_RDONLY);
     dup2(fileIn, 0);
     close(fileIn);
@@ -62,13 +70,28 @@ void io(char * token){
  
   }else if(!strcmp(token, ">")){
 
+    int pid2 = fork();
+    if(pid2 == 0){
+      if(execvp(tokes[0], tokes) < 0){
+	continue;
+      }
+    }else{
+      wait(nullptr);
+    }
     fileOut = open(token+1, O_WRONLY);
     dup2(fileOut, 1);
     close(fileOut);
     //break;
 
   }else if(!strcmp(token, ">>")){
-
+    int pid3 = fork();
+    if(pid3 == 0){
+      if(execvp(tokes[0], tokes) < 0){
+	continue;
+      }
+    }else{
+      wait(nullptr);
+    }
   }  
 }// io redirection method
 
