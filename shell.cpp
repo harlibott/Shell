@@ -9,6 +9,7 @@
 #include<sys/wait.h>
 #include<cstdlib>
 #include"shell.h"
+#include<fcntl.h>
 
 using namespace std;
 
@@ -17,111 +18,110 @@ int main(){
 
   while(true){ // program loop
     prompt(); // prompts the user 
-  
+
+    char * tokes[1042];  
     char str[1042];
     cin.getline(str, 1042);
-    int fileIn, fileOut;
-    char * tokes [1042];
     char * token;
     int i = 0;
-    token = strtok(str, " ");
+    int j = 0;
+    int compare = 0;
 
-    if(strcmp(token, "exit") == 0 || strcmp(token, "quit") == 0){
-	return EXIT_SUCCESS;
-      }
-    if(strcmp(token, "<") == 0 || strcmp(token, ">") == 0 || strcmp(token, ">>") == 0){
-	io(token);
-    }
-    //potential strcmp or !strcmp mistake above
-
+    token = strtok(str, " \r\n");
+    
     while(token != NULL){
       tokes[i] = token;
-      token = strtok(NULL, " ");
+      token = strtok(NULL, " \r\n");
       i++;
-      
-      int pid = fork();
-      if(pid == 0){
-	if(execvp(tokes[0], tokes) < 0){
-	  continue;
+    }
+    
+    tokes[i] = NULL;
+    
+    if(strcmp(tokes[0], "exit") == 0 || strcmp(tokes[0], "quit") == 0){
+      return EXIT_SUCCESS;
+    }
+    else if(i > 1){
+      while (j < i){
+	if(strcmp(tokes[j], "<") == 0 || strcmp(tokes[j], ">") == 0 || strcmp(tokes[j], ">>") == 0){
+	  compare = io(tokes[j]);
+	  break;
 	}
-      }else{
-	wait(nullptr);
+	j++;
       }
-    }// while   
+    }
+    
+    if (compare == 0){
+      
+      pid_t pid = fork();
+      
+      if (pid < 0){
+	perror("fork failed");
+	exit(EXIT_FAILURE);
+      }
+      else if(pid == 0){
+	execvp(tokes[0], tokes); 
+	cout << "Command not found" << endl;
+	exit(0);
+	
+      }else{
+	int status;
+	waitpid(pid, &status, 0);
+      }
+    }
+    else if (compare == 1){
+      cout << "get from file" << endl;
+
+    }
+    else if (compare == 2){
+      
+    }
+    else if (compare == 3){
+      
+      pid_t pid = fork();
+      
+      if(pid < 0){
+	cout << "fork failed" << endl;
+	exit(EXIT_FAILURE);
+      }
+      else if(pid == 0){
+	
+	char * newTokes[1042];
+	int k = 0;
+	
+	while(k < j){
+	  newTokes[k] = tokes[k];
+	  k++;
+	}
+	newTokes[k] = NULL;
+	
+	
+	int fd = open(tokes[j+1], O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+	dup2(fd, 1);
+	close(fd);
+	
+	execvp(newTokes[0], newTokes);
+      
+      }else{
+	int status;
+	waitpid(pid, &status, 0);
+
+      }
+    }
   }// shell while loop
 }// main
 
-void io(char * token){
-
+int io(char * token){
+  
   if(!strcmp(token, "<")){
-
-    int pid1 = fork();
-    if(pid1 == 0){
-      if(execvp(tokes[0], tokes) < 0){
-	continue;
-      }
-    }else{
-      wait(nullptr);
-    }
-    fileIn = open(token+1, O_RDONLY);
-    dup2(fileIn, 0);
-    close(fileIn);
-    //break;
- 
+    return 1;
   }else if(!strcmp(token, ">")){
-
-    int pid2 = fork();
-    if(pid2 == 0){
-      if(execvp(tokes[0], tokes) < 0){
-	continue;
-      }
-    }else{
-      wait(nullptr);
-    }
-    fileOut = open(token+1, O_WRONLY | O_TRUNC);
-    dup2(fileOut, 1);
-    close(fileOut);
-    //break;
-
+    return 2;
   }else if(!strcmp(token, ">>")){
-    int pid3 = fork();
-    if(pid3 == 0){
-      if(execvp(tokes[0], tokes) < 0){
-	continue;
-      }
-    }else{
-      wait(nullptr);
-    }
-    fileOut = open(token+1, O_WRONLY | O_APPEND);
-    dup2(fileOut, 1);
-    close(fileOut);
-    //break;
-  }  
-}// io redirection method
-
-/*
-  int f = open(argv[1], O_RDONLY);
-  int copy = dup(0);
-
-  if (f<0){
-  cout << "\nError opening file\n" << endl;
-  return 1;
+    return 3;
+  }else{
+    return 0;
   }
-  //check for proper usage, expecting one argument -- file to read from
- 
-  read();
-  // redirect standard input from file
- 
-  dup2(f,0);
-  read();
-  close(f);
-  // revert back from actual standard input
-
-  dup2(copy,0);
-  read();
-}
- */
-
+}// io redirection method
 
 void prompt(){
   // gets the cwd and prints it out as a prompt to the screen
@@ -158,6 +158,10 @@ void error(int e){
     cout << "\nInvalid arguments...\nEXIT FAILURE\n" << endl;
     exit(EXIT_FAILURE);
    
+  case 3:
+    cout << "\nFork error\n" << endl;
+    exit(EXIT_FAILURE);
+
   default: 
     cout << "\nThere was an error...\nEXIT FAILURE\n" << endl;
     exit(EXIT_FAILURE);
